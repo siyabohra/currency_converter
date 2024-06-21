@@ -1,78 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import CurrencyDropdown from './CurrencyDropdown';
-import { useDispatch , useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import {
-    setCurrencies,
     setAmount,
     setToCurrency,
     setFromCurrency,
     setConvertedAmount,
+    fetchcurrencies,
+    currencyConverter,
 } from '../feature/converter/converterSlice';
+
+
+//https://api.frankfurter.app/latest?amount=${amount}&from={fromCurrency}&to={toCurrency}
 
 function Converter() {
 
     const dispatch = useDispatch();
-    const currency = useSelector((state)=>state?.converterReducer?.currency??[]);
-    const amount = useSelector((state)=>state?.converterReducer?.amount??0);
-    const fromCurrency = useSelector((state)=>state?.converterReducer?.fromCurrency??"");
-    const toCurrency = useSelector ((state)=> state?.converterReducer?.toCurrency ??"");
-    const convertedAmount = useSelector ((state)=> state?.converterReducer?.convertedAmount ?? 0);
+    const currency = useSelector((state) => state.converter.currency);
+    const amount = useSelector((state) => state.converter.amount);
+    const fromCurrency = useSelector((state) => state.converter.fromCurrency);
+    const toCurrency = useSelector((state) => state.converter.toCurrency);
+    const convertedAmount = useSelector((state) => state.converter.convertedAmount);
 
 
-    // const [currencies, setCurrencies] = useState([]);
-    // const [amount, setAmount] = useState(0);
-    // const [fromCurrency, setFromCurrency] = useState("USD");
-    // const [toCurrency, setToCurrency] = useState("INR");
-    // const [convertedAmount, setConvertedAmount] = useState(null);
-    // function to fetch currencies data
+    // const currencyConverter = async () => {
+    //     try {
+    //         const response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
+    //         const data = await response.json();
+    //        const a = dispatch(setConvertedAmount(data.rates[toCurrency]));
+    //        console.log(a)
+    //     } catch (err) {
+    //         console.error('Error converting currency', err);
+    //     }
+    // };
 
-    const fetchCurrencies = async () => {
-        try {
-            const res = await fetch("https://api.frankfurter.app/currencies");
-            const data = await res.json(); // convert js object into json format
-            console.log(data)
-            dispatch(setCurrencies(data));
-        } catch (err) {
-            console.error('Error fetching data', err);
-        }
-    }
-
-    // main * after using this onchange event giving proper event 
     useEffect(() => {
-        fetchCurrencies();
-        currencyConverter();
-        if (amount === "") {
-            dispatch(setConvertedAmount("")) // in case of empty input
-        }
-
-    }, []); // whenever amount or currency updated 
+         dispatch(fetchcurrencies());
+         dispatch(currencyConverter(amount,toCurrency,fromCurrency))
+    }, [amount, fromCurrency, toCurrency,convertedAmount]);
 
     const changeHandler = (e) => {
         dispatch(setAmount(e.target.value));
     };
 
-    const currencyConverter = async () => {
-        try {
-            const res = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
-            const data = await res.json();
-            dispatch(setConvertedAmount(data.rates[toCurrency]));
-            console.log(data.rates[toCurrency]);
-        } catch (err) {
-            console.error('Error converting currency', err);
-        }
-    }
+
 
     const swipeCurrency = () => {
         dispatch(setFromCurrency(toCurrency));
-        dispatch(setToCurrency(fromCurrency))
-    }
+        dispatch(setToCurrency(fromCurrency));
+    };
 
     return (
-
         <div className='w-25 border bg-white mx-auto rounded convertor'>
             <h2 className='text-center fst-italic text-info-emphasis border-bottom-2'>Currency Converter</h2>
             <div className='px-4'>
@@ -83,12 +65,10 @@ function Converter() {
                     handleChange={(e) => dispatch(setFromCurrency(e.target.value))}
                 />
                 <br />
-
-                <div className='border text-center w-25 mx-auto  text-white bg-black  rounded-pill py-2 fontosm' onClick={swipeCurrency}>
+                <div className='border text-center w-25 mx-auto  text-white bg-black  rounded-pill py-1 fontosm' onClick={swipeCurrency}>
                     <FontAwesomeIcon icon={faArrowDown} />
                     <FontAwesomeIcon icon={faArrowUp} />
                 </div>
-
                 <CurrencyDropdown
                     currencies={currency}
                     title='To:'
@@ -100,11 +80,10 @@ function Converter() {
                 <label htmlFor="currency" className='fst-italic fs-5'>Amount:</label><br />
                 <input
                     type="number"
-                    className='my-2'
+                    className='my-2 inputbox'
                     value={amount}
                     onChange={changeHandler}
                 /><br />
-
                 <button
                     className='bg-black  text-white fst-italic fs-5 rounded border-0 my-2'
                     onClick={currencyConverter}
@@ -112,15 +91,13 @@ function Converter() {
                     Convert
                 </button>
             </div>
-            {
-                convertedAmount !== null &&  (
-                    <h4 className='currency-convert text-info-emphasis  px-2'>
-                        <p className='text-info-emphasis'> 1 USD = 83.43 INR</p>
-                        <p className='output'> {amount} {fromCurrency} = {convertedAmount} {toCurrency} </p>
-                    </h4>
-                )}
+            {convertedAmount !== null && (
+                <h4 className='currency-convert text-info-emphasis  px-2'>
+                    <p className='text-info-emphasis'> 1 USD = 83.43 INR</p>
+                    <p className='output'> {amount} {fromCurrency} = {convertedAmount} {toCurrency} </p>
+                </h4>
+            )}
         </div>
-
     );
 }
 

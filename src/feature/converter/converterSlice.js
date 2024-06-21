@@ -1,38 +1,85 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+// use createAsyncthunk method for fetching data from api in redux toolkit 
 
 
-const converterReducer = createSlice({
-    name:"converter",
-    initialState: {
-        currency: [],
-        amount:0,
-        fromCurrency:"USD",
-        toCurrency:"INR",
-        convertedAmount:null
-    },
-    reducer:{
-        setCurrencies: (state,action)=>{
-            state.currency = action.payload;
-        },
-        setAmount: (state,action)=>{
+const ApiUrl = 'https://api.frankfurter.app/currencies';
+
+const initialState = {
+    currency: [],
+    amount: 1,
+    fromCurrency: "Australian Dollar",
+    toCurrency: "Indian Rupee",
+    convertedAmount:0,
+    Loading: 'loading',
+}
+
+export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', async () => {   
+    const response = await fetch(ApiUrl);
+    const data = await response.json();
+    // console.log(Object.values(data))
+    return Object.values(data); // use keys bcoz map is not working on object and need single value
+    
+});
+
+
+
+
+export const currencyConverter = createAsyncThunk( 'dataconverter/currencyConverter' ,async ({fromCurrency,toCurrency,amount}) => {
+        const response = await fetch(`${ApiUrl}/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
+        const data = await response.json();
+        console.log(data)
+        return data.rates[toCurrency];
+        // console.log(data.rates[toCurrency])
+    }
+)
+
+const converterSlice = createSlice({
+    name: 'converter',
+    initialState:initialState,
+    reducers: {
+        setAmount: (state, action) => {
             state.amount = action.payload;
         },
-        setFromCurrency: (state,action) =>{
-            state.fromCurrency = action.payload
+        setFromCurrency: (state, action) => {
+            state.fromCurrency = action.payload;
         },
-        setToCurrency: (state,action) =>{
-            state.toCurrency = action.payload
+        setToCurrency: (state, action) => {
+            state.toCurrency = action.payload;
         },
-        setConvertedAmount: (state,action) =>{
-            state.convertedAmount = action.payload
+        setConvertedAmount: (state, action) => {
+            state.convertedAmount = action.payload;
         }
+    },
+    extraReducers: (builder) => {
+        builder.addCase(fetchcurrencies.pending, (state) => {
+                state.Loading = 'loading';
+            });
+        builder.addCase(fetchcurrencies.fulfilled, (state, action) => {
+                state.Loading = 'succeeded';
+                state.currency = action.payload;
+            });
+        builder.addCase(fetchcurrencies.rejected, (state) => {
+                state.Loading = 'failed';
+            });
+        builder.addCase(currencyConverter.pending, (state) =>{
+            state.Loading = 'loading';
+        })
+        builder.addCase(currencyConverter.fulfilled,(state,action)=>{
+            state.convertedAmount = action.payload;
+            state.Loading = 'succeeded';
+        })
+        builder.addCase(currencyConverter.rejected,(state,action)=>{
+            state.Loading = 'failed';
+        })
     }
-})
+});
+
 export const {
-    setCurrencies,
     setAmount,
     setFromCurrency,
     setToCurrency,
     setConvertedAmount
-} = converterReducer.actions;
-export default converterReducer.reducer;
+} = converterSlice.actions;
+
+export default converterSlice.reducer;
