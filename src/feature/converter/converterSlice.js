@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // use createAsyncthunk method for fetching data from api in redux toolkit 
 
 
-const ApiUrl = 'https://api.frankfurter.app/currencies';
+const ApiUrl = 'https://api.frankfurter.app';
 
 const initialState = {
     currency: {},
@@ -15,7 +15,7 @@ const initialState = {
 }
 
 export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', async () => {   
-    const response = await fetch(ApiUrl);
+    const response = await fetch(`${ApiUrl}/currencies`);
     const data = await response.json();
     // console.log(Object.values(data))
     return Object.keys(data); // use keys bcoz map is not working on object and need single value
@@ -43,6 +43,7 @@ const converterSlice = createSlice({
             state.amount = action.payload;
         },
         setFromCurrency: (state, action) => {
+            console.log(action);
             state.fromCurrency = action.payload;
         },
         setToCurrency: (state, action) => {
@@ -54,21 +55,21 @@ const converterSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchcurrencies.pending, (state) => {
-                state.Loading = 'loading';
-            });
+            state.Loading = 'loading';
+        });
         builder.addCase(fetchcurrencies.fulfilled, (state, action) => {
-                state.Loading = 'succeeded';
-                state.currency = action.payload;
-            });
+            state.Loading = 'succeeded';
+            state.currency = action.payload;
+        });
         builder.addCase(fetchcurrencies.rejected, (state) => {
-                state.Loading = 'failed';
-            });
+            state.Loading = 'failed';
+        });
         builder.addCase(currencyConverter.pending, (state) =>{
             state.Loading = 'loading';
         })
-        builder.addCase(currencyConverter.fulfilled,(state,action)=>{
-            state.convertedAmount = action.payload;
+        builder.addCase(currencyConverter.fulfilled, (state, action)=>{
             state.Loading = 'succeeded';
+            state.convertedAmount = action.payload;
         })
         builder.addCase(currencyConverter.rejected,(state,action)=>{
             state.Loading = 'failed';

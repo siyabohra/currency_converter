@@ -9,9 +9,9 @@ import {
     setAmount,
     setToCurrency,
     setFromCurrency,
-    setConvertedAmount,
     fetchcurrencies,
     currencyConverter,
+    setConvertedAmount,
 } from '../feature/converter/converterSlice';
 
 
@@ -21,12 +21,12 @@ function Converter() {
 
     const dispatch = useDispatch();
     const currency = useSelector((state) => state.converter.currency);
+    console.log(currency)
     const amount = useSelector((state) => state.converter.amount);
     const fromCurrency = useSelector((state) => state.converter.fromCurrency);
     const toCurrency = useSelector((state) => state.converter.toCurrency);
     const convertedAmount = useSelector((state) => state.converter.convertedAmount);
     console.log(convertedAmount)
-
 
     // const currencyConverter = async () => {
     //     try {
@@ -39,16 +39,19 @@ function Converter() {
     //     }
     // };
 
-    useEffect(() => {
-         dispatch(fetchcurrencies());
-         dispatch(currencyConverter(amount,toCurrency,fromCurrency))
-    }, [amount, fromCurrency, toCurrency,convertedAmount]);
+  useEffect(() => {
+    dispatch(fetchcurrencies());
+  }, [])
 
-    const changeHandler = (e) => {
+  useEffect(() => {
+    dispatch(fetchcurrencies());
+    dispatch(currencyConverter({ fromCurrency, toCurrency, amount }))
+  }, [amount, fromCurrency, toCurrency]);
+
+
+  const changeHandler = (e) => {
         dispatch(setAmount(e.target.value));
     };
-
-
 
     const swipeCurrency = () => {
         dispatch(setFromCurrency(toCurrency));
@@ -74,7 +77,10 @@ function Converter() {
                     currencies={currency}
                     title='To:'
                     selectedCurrency={toCurrency}
-                    handleChange={(e) => dispatch(setToCurrency(e.target.value))}
+            handleChange={(e) => {
+                      console.log(e.target);
+                      dispatch(setToCurrency(e.target.value))
+                    }}
                 />
             </div>
             <div className='w-25 p-4 text-center'>
@@ -87,17 +93,15 @@ function Converter() {
                 /><br />
                 <button
                     className='bg-black  text-white fst-italic fs-5 rounded border-0 my-2'
-                    onClick={currencyConverter}
+                    // onClick={currencyConverter}
                 >
                     Convert
                 </button>
             </div>
-            {convertedAmount !== null && (
-                <h4 className='currency-convert text-info-emphasis  px-2'>
-                    <p className='text-info-emphasis'> 1 USD = 83.43 INR</p>
-                    <p className='output'> {amount} {fromCurrency} = {convertedAmount} {toCurrency} </p>
-                </h4>
-            )}
+            <h4 className='currency-convert text-info-emphasis  px-2'>
+                <p className='text-info-emphasis'> 1 USD = 83.43 INR</p>
+                <p className='output'> {amount} {fromCurrency} = {convertedAmount} {toCurrency} </p>
+            </h4>
         </div>
     );
 }
