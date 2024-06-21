@@ -25,6 +25,7 @@ function Converter() {
     const fromCurrency = useSelector((state) => state.converter.fromCurrency);
     const toCurrency = useSelector((state) => state.converter.toCurrency);
     const convertedAmount = useSelector((state) => state.converter.convertedAmount);
+    console.log(convertedAmount)
 
 
     // const currencyConverter = async () => {

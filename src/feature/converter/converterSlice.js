@@ -6,10 +6,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 const ApiUrl = 'https://api.frankfurter.app/currencies';
 
 const initialState = {
-    currency: [],
+    currency: {},
     amount: 1,
-    fromCurrency: "Australian Dollar",
-    toCurrency: "Indian Rupee",
+    fromCurrency: "USD",
+    toCurrency: "INR",
     convertedAmount:0,
     Loading: 'loading',
 }
@@ -18,7 +18,7 @@ export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', asy
     const response = await fetch(ApiUrl);
     const data = await response.json();
     // console.log(Object.values(data))
-    return Object.values(data); // use keys bcoz map is not working on object and need single value
+    return Object.keys(data); // use keys bcoz map is not working on object and need single value
     
 });
 
@@ -26,7 +26,8 @@ export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', asy
 
 
 export const currencyConverter = createAsyncThunk( 'dataconverter/currencyConverter' ,async ({fromCurrency,toCurrency,amount}) => {
-        const response = await fetch(`${ApiUrl}/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
+    console.log(fromCurrency)
+        const response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
         const data = await response.json();
         console.log(data)
         return data.rates[toCurrency];
