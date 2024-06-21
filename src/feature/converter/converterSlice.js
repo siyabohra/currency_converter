@@ -3,30 +3,34 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // use createAsyncthunk method for fetching data from api in redux toolkit 
 
 
-const ApiUrl = 'https://api.frankfurter.app/currencies';
+const ApiUrl = 'https://api.frankfurter.app';
 
 const initialState = {
-    currency: [],
+    currency: {},
     amount: 1,
-    fromCurrency: "Australian Dollar",
-    toCurrency: "Indian Rupee",
-    convertedAmount:0,
+    fromCurrency: "INR",
+    toCurrency: "USD",
+    convertedAmount: 0,
     Loading: 'loading',
 }
 
-export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', async () => {   
-    const response = await fetch(ApiUrl);
-    const data = await response.json();
-    // console.log(Object.values(data))
-    return Object.values(data); // use keys bcoz map is not working on object and need single value
-    
-});
+export const fetchcurrencies = createAsyncThunk(
+    'converter/fetchcurrencies',
+    async () => {  
+        const response = await fetch(`${ApiUrl}/currencies`);
+        const data = await response.json();
+        return data; // use keys bcoz map is not working on object and need single value
+    }
+);
 
 
-
-
-export const currencyConverter = createAsyncThunk( 'dataconverter/currencyConverter' ,async ({fromCurrency,toCurrency,amount}) => {
+export const currencyConverter = createAsyncThunk(
+    'converter/currencyConverter',
+    async ({fromCurrency, toCurrency, amount}) => {
+        console.log(toCurrency);
+        console.log(amount);
         const response = await fetch(`${ApiUrl}/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
+        // const response = await fetch(`https://api.frankfurter.app/latest?amount=1&from=INR&to=USD`);
         const data = await response.json();
         console.log(data)
         return data.rates[toCurrency];
@@ -42,6 +46,7 @@ const converterSlice = createSlice({
             state.amount = action.payload;
         },
         setFromCurrency: (state, action) => {
+            console.log(action);
             state.fromCurrency = action.payload;
         },
         setToCurrency: (state, action) => {
@@ -53,21 +58,21 @@ const converterSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchcurrencies.pending, (state) => {
-                state.Loading = 'loading';
-            });
+            state.Loading = 'loading';
+        });
         builder.addCase(fetchcurrencies.fulfilled, (state, action) => {
-                state.Loading = 'succeeded';
-                state.currency = action.payload;
-            });
+            state.Loading = 'succeeded';
+            state.currency = action.payload;
+        });
         builder.addCase(fetchcurrencies.rejected, (state) => {
-                state.Loading = 'failed';
-            });
+            state.Loading = 'failed';
+        });
         builder.addCase(currencyConverter.pending, (state) =>{
             state.Loading = 'loading';
         })
-        builder.addCase(currencyConverter.fulfilled,(state,action)=>{
-            state.convertedAmount = action.payload;
+        builder.addCase(currencyConverter.fulfilled, (state, action)=>{
             state.Loading = 'succeeded';
+            state.convertedAmount = action.payload;
         })
         builder.addCase(currencyConverter.rejected,(state,action)=>{
             state.Loading = 'failed';
