@@ -14,42 +14,25 @@ import {
     setConvertedAmount,
 } from '../feature/converter/converterSlice';
 
-
-//https://api.frankfurter.app/latest?amount=${amount}&from={fromCurrency}&to={toCurrency}
-
 function Converter() {
-
     const dispatch = useDispatch();
     const currency = useSelector((state) => state.converter.currency);
-    console.log(currency)
     const amount = useSelector((state) => state.converter.amount);
     const fromCurrency = useSelector((state) => state.converter.fromCurrency);
     const toCurrency = useSelector((state) => state.converter.toCurrency);
     const convertedAmount = useSelector((state) => state.converter.convertedAmount);
-    console.log(convertedAmount)
 
-    // const currencyConverter = async () => {
-    //     try {
-    //         const response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
-    //         const data = await response.json();
-    //        const a = dispatch(setConvertedAmount(data.rates[toCurrency]));
-    //        console.log(a)
-    //     } catch (err) {
-    //         console.error('Error converting currency', err);
-    //     }
-    // };
+    useEffect(() => {
+        dispatch(fetchcurrencies());
+    }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchcurrencies());
-  }, [])
+    useEffect(() => {
+        if (amount && fromCurrency && toCurrency) {
+            dispatch(currencyConverter({ fromCurrency, toCurrency, amount }));
+        }
+    }, [amount, fromCurrency, toCurrency, dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchcurrencies());
-    dispatch(currencyConverter({ fromCurrency, toCurrency, amount }))
-  }, [amount, fromCurrency, toCurrency]);
-
-
-  const changeHandler = (e) => {
+    const changeHandler = (e) => {
         dispatch(setAmount(e.target.value));
     };
 
@@ -69,7 +52,7 @@ function Converter() {
                     handleChange={(e) => dispatch(setFromCurrency(e.target.value))}
                 />
                 <br />
-                <div className='border text-center w-25 mx-auto  text-white bg-black  rounded-pill py-1 fontosm' onClick={swipeCurrency}>
+                <div className='border text-center w-25 mx-auto text-white bg-black rounded-pill py-1 fontosm' onClick={swipeCurrency}>
                     <FontAwesomeIcon icon={faArrowDown} />
                     <FontAwesomeIcon icon={faArrowUp} />
                 </div>
@@ -77,10 +60,7 @@ function Converter() {
                     currencies={currency}
                     title='To:'
                     selectedCurrency={toCurrency}
-            handleChange={(e) => {
-                      console.log(e.target);
-                      dispatch(setToCurrency(e.target.value))
-                    }}
+                    handleChange={(e) => dispatch(setToCurrency(e.target.value))}
                 />
             </div>
             <div className='w-25 p-4 text-center'>
@@ -91,19 +71,16 @@ function Converter() {
                     value={amount}
                     onChange={changeHandler}
                 /><br />
-                <button
-                    className='bg-black  text-white fst-italic fs-5 rounded border-0 my-2'
-                    // onClick={currencyConverter}
-                >
-                    Convert
-                </button>
             </div>
-            <h4 className='currency-convert text-info-emphasis  px-2'>
-                <p className='text-info-emphasis'> 1 USD = 83.43 INR</p>
-                <p className='output'> {amount} {fromCurrency} = {convertedAmount} {toCurrency} </p>
-            </h4>
+            <p className='text-info-emphasis px-5 fs-4 fw-bold'>1 USD = 83.57 INR </p>
+            {amount && convertedAmount && (
+                <h4 className='currency-convert text-info-emphasis pe-3'>
+                    <p className='output text-info-emphasis  fs-4 fw-bold'>{amount} {fromCurrency} = {convertedAmount} {toCurrency}</p>
+                </h4>
+            )}
         </div>
     );
 }
 
 export default Converter;
+

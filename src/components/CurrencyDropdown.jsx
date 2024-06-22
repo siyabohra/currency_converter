@@ -6,10 +6,17 @@ function CurrencyDropdown({ currencies, title, selectedCurrency, handleChange })
         <div className="mb-3">
             <label className='fst-italic fs-5'>{title}</label>
             <select className="form-select" value={selectedCurrency} onChange={handleChange}>
-                { Object.values(currencies).map((currency, index) => (
-                    <option key={index} value={currency}>{currency}</option>
-                ))}
-            </select>
+
+                {
+                    Object.keys(currencies).map((currency, index) => {
+                        const data = currencies[currency]
+                        console.log(data);
+                        return(
+                        <option key={index} value={currency}>
+                            {data}
+                        </option>)
+                    })}
+            </select >
         </div>
     );
 }

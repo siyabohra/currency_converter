@@ -7,10 +7,10 @@ const ApiUrl = 'https://api.frankfurter.app';
 
 const initialState = {
     currency: {},
-    amount: 1,
+    amount: 0,
     fromCurrency: "USD",
     toCurrency: "INR",
-    convertedAmount:0,
+    convertedAmount:"",
     Loading: 'loading',
 }
 
@@ -18,18 +18,18 @@ export const fetchcurrencies = createAsyncThunk('converter/fetchcurrencies', asy
     const response = await fetch(`${ApiUrl}/currencies`);
     const data = await response.json();
     // console.log(Object.values(data))
-    return Object.keys(data); // use keys bcoz map is not working on object and need single value
+    return data; 
     
 });
 
 
 
 
+
 export const currencyConverter = createAsyncThunk( 'dataconverter/currencyConverter' ,async ({fromCurrency,toCurrency,amount}) => {
-    console.log(fromCurrency)
         const response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
         const data = await response.json();
-        console.log(data)
+        console.log(toCurrency)
         return data.rates[toCurrency];
         // console.log(data.rates[toCurrency])
     }
